@@ -10,4 +10,4 @@ Download and place `CustomIntonation.fst` in the directory shown below to allow 
 
 ## Add your own presets!
 
-If you have Python 3.X installed, use the supplied `add_scale.py` script to generate a compatible pitch profile from the contents of a `.scl` file. Use the `--fst` flag to add that new profile to the preset list.
+If you have Python 3.X installed, use the supplied `add_scale.py` script to generate a compatible pitch profile from the contents of a `.scl` file. Use the `--fst` flag to add that new profile to the preset list; for that option to work properly, the `_template.fst` file must also be in the same directory.
