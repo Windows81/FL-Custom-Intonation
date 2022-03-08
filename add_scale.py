@@ -71,7 +71,7 @@ def calc(o):
     c: int = 0
     for l in o.file or sys.stdin:
         l = l.strip()
-        if l.startswith("!"):
+        if l.startswith("!") or l == "":
             continue
         elif not desc:
             desc = l
@@ -116,7 +116,7 @@ def calc(o):
                     a[i2 + 0] = v
                 if i2 < 11 and a[i2 + 1] is None:
                     a[i2 + 1] = v
-                if i2 < 10 and a[i2 + 0] is not None and a[i2 + 1][0] == a[i2 + 2][0]:
+                if i2 < 10 and a[i2 + 2] is not None and a[i2 + 1][0] == a[i2 + 2][0]:
                     a[i2 + 1] = v
         if a[0] is None and not a[11] is None:
             a[0] = (a[11][0] - 12, *a[11][1:])
