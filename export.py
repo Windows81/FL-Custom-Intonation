@@ -24,8 +24,8 @@ a = {
 }
 
 for freq, dir_name in a.items():
-    offset = math.log2(freq / 440) * 12 - 3
-    fst_dir = f"{FST_STORE}/{dir_name}"
+    shift = math.log2(freq / 440) * 12 - 3
+    fst_dir = f"{FST_STORE}/Scala/{dir_name}"
     if not os.path.exists(fst_dir):
         os.mkdir(fst_dir)
     for l in os.listdir(f"{DIRECTORY}/scl"):
@@ -36,9 +36,8 @@ for freq, dir_name in a.items():
             i = info()
             i.description = ""
             i.fst = fst
-            i.offset = offset
-            i.pitches = calc(open(f"./scl/{l}"), offset)
+            i.pitches, i.offset = calc(open(f"./scl/{l}"), shift)
             fst_from_file(i)
-            print(f'Successfully parsed "{l}" at {dir_name}')
+            print(f'Successfully parsed  at {dir_name}: "{l}"')
         except ValueError:
             pass

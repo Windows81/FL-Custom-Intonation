@@ -57,7 +57,7 @@ class info:
     fst: str
 
 
-def calc(lines: list[str], offset: float) -> list[float]:
+def calc(lines: list[str], shift: float) -> tuple[list[float], float]:
     a: list[(float, str)] = []
     n: int = -1
     c: int = 0
@@ -79,7 +79,7 @@ def calc(lines: list[str], offset: float) -> list[float]:
                     if not "." in l
                     else float(f[0]) / 100
                 )
-                + offset
+                + shift
             ) % 12
             a.append((v, l))
             c += 1
@@ -120,7 +120,7 @@ def calc(lines: list[str], offset: float) -> list[float]:
     elif mn < -1 or mx > 1:
         off = (mx + mn) / 2
         d = [(s - off, *e) for s, *e in d]
-    return d
+    return d, off
 
 
 def interpret(o) -> info:
