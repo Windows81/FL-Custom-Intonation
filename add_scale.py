@@ -3,8 +3,9 @@ import os
 import math
 import sys
 import struct
-import re
 
+DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+FST_STORE = f'{os.environ["USERPROFILE"]}/Documents/Image-Line/FL Studio/Presets/Plugin presets/Effects/Control Surface'
 KEYS = ["C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "]
 FST_SEEK = [
     2407,
@@ -56,31 +57,17 @@ class info:
     fst: str
 
 
-def parse():
-    a = argparse.ArgumentParser()
-    a.add_argument("file", type=argparse.FileType("r"))
-    a.add_argument("-o", "--pitch-shift", type=float, default=0)
-    a.add_argument("--fst", action="store_true")
-    return a.parse_args()
-
-
-def calc(o):
-    desc: str = None
+def calc(lines: list[str], offset: float) -> list[float]:
     a: list[(float, str)] = []
     n: int = -1
     c: int = 0
-    for l in o.file or sys.stdin:
+    for l in lines:
         l = l.strip()
         if l.startswith("!") or l == "":
             continue
-        elif not desc:
-            desc = l
-            fn = (
-                os.path.split(o.file.name)[1]
-                if o.file and "<" not in o.file.name
-                else "".join(SUB_CHARS.get(c, c) for c in desc)
-            )
         elif n == -1:
+            n -= 1
+        elif n == -2:
             n = int(l)
             if n > 12:
                 raise ValueError(f"Should contain at most twelve notes, but has {n}.")
@@ -92,11 +79,12 @@ def calc(o):
                     if not "." in l
                     else float(f[0]) / 100
                 )
-                + o.pitch_shift
+                + offset
             ) % 12
             a.append((v, l))
             c += 1
     a.sort()
+
     if c < 12:
         t = c
         a += [None] * (12 - c)
@@ -108,7 +96,7 @@ def calc(o):
                 i2 = int(v[0])
                 if a[i2 - 1] is None:
                     a[i2 - 1] = v
-                if a[i2] is None:
+                if a[i2 + 0] is None:
                     a[i2 + 0] = v
                 if i2 < 11 and a[i2 + 1] is not None and a[i2 + 0][0] == a[i2 + 1][0]:
                     if i2 > 1 and a[i2 - 1][0] == a[i2 + 0][0]:
@@ -132,20 +120,39 @@ def calc(o):
     elif mn < -1 or mx > 1:
         off = (mx + mn) / 2
         d = [(s - off, *e) for s, *e in d]
+    return d
 
+
+def interpret(o) -> info:
+    desc: str = None
+    a: list[str] = []
+    for l in o.file or sys.stdin:
+        if not desc:
+            desc = l.strip()
+            fn = (
+                os.path.split(o.file.name)[1]
+                if o.file and "<" not in o.file.name
+                else "".join(SUB_CHARS.get(c, c) for c in desc)
+            )
+        a.append(l)
+
+    off = o.pitch_shift
+    d = calc(a, off)
     t = info()
     t.description = desc
     t.pitches = d
     t.offset = off
     t.fst = (
-        f'{os.environ["USERPROFILE"]}/Documents/Image-Line/FL Studio/Presets/Plugin presets/Effects/Control Surface/{fn}.fst'
+        o.fst_file.replace("{}", fn)
+        if o.fst_file
+        else f"{FST_STORE}/{fn}.fst"
         if o.fst
         else None
     )
     return t
 
 
-def output_pitches(t):
+def output_pitches(t: info):
     for (s, i, l) in t:
         print(f'{KEYS[i]} {s*100:+06.1f} cents - "{l}"')
 
@@ -160,7 +167,7 @@ def output_table(t: info):
 def fst_from_file(t: info):
     if not t.fst:
         return
-    rf = open(sys.path[0] + "/_template.fst", "rb")
+    rf = open(f"{DIRECTORY}/_template.fst", "rb")
     b = list(rf.raw.readall())
     FST_OFFSET = FST_SEEK[12]
     for (s, *_), p in zip(t.pitches, FST_SEEK):
@@ -172,9 +179,18 @@ def fst_from_file(t: info):
     wf.close()
 
 
+def parse_args():
+    a = argparse.ArgumentParser()
+    a.add_argument("file", type=argparse.FileType("r"))
+    a.add_argument("-o", "--pitch-shift", type=float, default=0)
+    a.add_argument("--fst", "-b", action="store_true")
+    a.add_argument("--fst-file", type=str)
+    return a.parse_args()
+
+
 if __name__ == "__main__":
     try:
-        output_table(calc(parse()))
+        output_table(interpret(parse_args()))
     except ValueError as x:
         print(x.args[0])
         if len(x.args) > 1:
