@@ -53,11 +53,11 @@ SUB_CHARS = {
 class info:
     description: str
     offset: float
-    pitches: list[float]
+    pitches: list[tuple[float, int, str]]
     fst: str
 
 
-def calc(lines: list[str], shift: float) -> tuple[list[float], float]:
+def calc(lines: list[str], shift: float) -> tuple[list[tuple[float, int, str]], float]:
     a: list[(float, str)] = []
     n: int = -1
     c: int = 0
@@ -136,12 +136,10 @@ def interpret(o) -> info:
             )
         a.append(l)
 
-    off = o.pitch_shift
-    d = calc(a, off)
     t = info()
+    off = o.pitch_shift
+    t.pitches, t.offset = calc(a, off)
     t.description = desc
-    t.pitches = d
-    t.offset = off
     t.fst = (
         o.fst_file.replace("{}", fn)
         if o.fst_file
@@ -153,13 +151,13 @@ def interpret(o) -> info:
 
 
 def output_pitches(t: info):
-    for (s, i, l) in t:
+    for (s, i, l) in t.pitches:
         print(f'{KEYS[i]} {s*100:+06.1f} cents - "{l}"')
 
 
 def output_table(t: info):
     print(t.description)
-    output_pitches(t.pitches)
+    output_pitches(t)
     print(f"   {t.offset*100:+06.1f} cents")
     fst_from_file(t)
 

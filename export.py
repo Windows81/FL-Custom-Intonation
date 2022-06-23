@@ -38,6 +38,6 @@ for freq, dir_name in a.items():
             i.fst = fst
             i.pitches, i.offset = calc(open(f"./scl/{l}"), shift)
             fst_from_file(i)
-            print(f'Successfully parsed  at {dir_name}: "{l}"')
+            print(f'Successfully parsed at {dir_name}: "{l}"')
         except ValueError:
             pass
