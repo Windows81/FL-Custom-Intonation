@@ -1,11 +1,12 @@
+from file_util import DIRECTORY, FST_STORE
 import argparse
 import os
 import math
 import sys
 import struct
 
-DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-FST_STORE = f'{os.environ["USERPROFILE"]}/Documents/Image-Line/FL Studio/Presets/Plugin presets/Effects/Control Surface'
+from scale_util import parse_interval
+
 KEYS = ["C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "]
 FST_SEEK = [
     2407,
@@ -54,13 +55,13 @@ class info:
     description: str
     offset: float
     pitches: list[tuple[float, int, str]]
-    fst: str
+    fst_path: str
 
 
 def calc(lines: list[str], shift: float) -> tuple[list[tuple[float, int, str]], float]:
-    a: list[(float, str)] = []
+    a: list[(float, str)] = [(shift % 12, "1/1")]
     n: int = -1
-    c: int = 0
+    c: int = 1
     for l in lines:
         l = l.strip()
         if l.startswith("!") or l == "":
@@ -72,17 +73,10 @@ def calc(lines: list[str], shift: float) -> tuple[list[tuple[float, int, str]], 
             if n > 12:
                 raise ValueError(f"Should contain at most twelve notes, but has {n}.")
         elif c < 12:
-            f = l.split(" ", 1)[0].split("/")
-            v = (
-                (
-                    12 * math.log2(int(f[0]) / int(f[1] if len(f) > 1 else 1))
-                    if not "." in l
-                    else float(f[0]) / 100
-                )
-                + shift
-            ) % 12
-            a.append((v, l))
-            c += 1
+            v = parse_interval(l)
+            if v % 12 != 0:
+                a.append(((v + shift) % 12, l))
+                c += 1
     a.sort()
 
     if c < 12:
@@ -140,7 +134,7 @@ def interpret(o) -> info:
     off = o.pitch_shift
     t.pitches, t.offset = calc(a, off)
     t.description = desc
-    t.fst = (
+    t.fst_path = (
         o.fst_file.replace("{}", fn)
         if o.fst_file
         else f"{FST_STORE}/{fn}.fst"
@@ -162,19 +156,20 @@ def output_table(t: info):
     fst_from_file(t)
 
 
-def fst_from_file(t: info):
-    if not t.fst:
-        return
+def fst_from_file(t: info) -> bool:
+    if not t.fst_path:
+        return False
     rf = open(f"{DIRECTORY}/_template.fst", "rb")
     b = list(rf.raw.readall())
     FST_OFFSET = FST_SEEK[12]
     for (s, *_), p in zip(t.pitches, FST_SEEK):
         b[p : p + 4] = struct.pack("f", 0.5 + s / 2)
     b[FST_OFFSET : FST_OFFSET + 4] = struct.pack("f", 0.5 + t.offset / 24)
-    wf = open(t.fst, "wb")
+    wf = open(t.fst_path, "wb")
     wf.write(bytes(b))
     rf.close()
     wf.close()
+    return True
 
 
 def parse_args():
