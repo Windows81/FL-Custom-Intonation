@@ -4,10 +4,9 @@ import argparse
 import math
 
 
-def search(lines: list[str], smtn_diff: float, epsilon: float = 1e-9):
-    matches: list[tuple[str, str]] = []
+def search(lines: list[str], smtn_diffs: list[float], epsilon: float = 1e-9):
     a: list[(float, str)] = [(0, "1/1")]
-    smtn_diff = smtn_diff % 12
+    smtn_diffs = [s % 12 for s in smtn_diffs]
     n: int = -1
     c: int = 1
     for l in lines:
@@ -26,27 +25,34 @@ def search(lines: list[str], smtn_diff: float, epsilon: float = 1e-9):
                 a.append((v, l))
                 c += 1
 
+    matches: list[tuple[str, str]] = []
+    match_set = set(smtn_diffs)
     for i in range(0, len(a)):
         for j in range(i + 1, len(a)):
             diff = abs((a[i][0] - a[j][0]) % 12)
-            if math.isclose(diff, smtn_diff, abs_tol=epsilon):
-                matches.append((a[j][1], a[i][1]))
-            elif math.isclose(12 - diff, smtn_diff, abs_tol=epsilon):
-                matches.append((a[i][1], a[j][1]))
+            for s in smtn_diffs:
+                if math.isclose(diff, s, abs_tol=epsilon):
+                    matches.append((a[j][1], a[i][1]))
+                    match_set.discard(s)
+                elif math.isclose(12 - diff, s, abs_tol=epsilon):
+                    matches.append((a[i][1], a[j][1]))
+                    match_set.discard(s)
+    if match_set:
+        return []
     return matches
 
 
 if __name__ == "__main__":
     a = argparse.ArgumentParser()
-    a.add_argument("semitones", type=parse_interval)
-    a.add_argument("epsilon", type=float, nargs="?", default=1e-4)
+    a.add_argument("interval", type=parse_interval, nargs="+")
+    a.add_argument("--epsilon", type=float, nargs="?", default=1e-4)
     args = a.parse_args()
 
     d = {}
     for i in get_scl_paths():
         with open(i.scl_path) as f:
             try:
-                r = search(f.readlines(), args.semitones, args.epsilon)
+                r = search(f.readlines(), args.interval, args.epsilon)
                 l = len(r)
                 if l > 0:
                     d[i.scale] = r

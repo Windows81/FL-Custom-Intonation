@@ -1,7 +1,6 @@
 from file_util import DIRECTORY, FST_STORE
 import argparse
 import os
-import math
 import sys
 import struct
 
@@ -117,28 +116,28 @@ def calc(lines: list[str], shift: float) -> tuple[list[tuple[float, int, str]], 
     return d, off
 
 
-def interpret(o) -> info:
+def interpret(pitch_shift, file, fst_file, fst) -> info:
     desc: str = None
     a: list[str] = []
-    for l in o.file or sys.stdin:
+    for l in file or sys.stdin:
         if not desc:
             desc = l.strip()
             fn = (
-                os.path.split(o.file.name)[1]
-                if o.file and "<" not in o.file.name
+                os.path.split(file.name)[1]
+                if file and "<" not in file.name
                 else "".join(SUB_CHARS.get(c, c) for c in desc)
             )
         a.append(l)
 
     t = info()
-    off = o.pitch_shift
+    off = pitch_shift
     t.pitches, t.offset = calc(a, off)
     t.description = desc
     t.fst_path = (
-        o.fst_file.replace("{}", fn)
-        if o.fst_file
+        fst_file.replace("{}", fn)
+        if fst_file
         else f"{FST_STORE}/{fn}.fst"
-        if o.fst
+        if fst
         else None
     )
     return t
@@ -175,7 +174,7 @@ def fst_from_file(t: info) -> bool:
 def parse_args():
     a = argparse.ArgumentParser()
     a.add_argument("file", type=argparse.FileType("r"))
-    a.add_argument("-o", "--pitch-shift", type=float, default=0)
+    a.add_argument("--pitch-shift", "-o", type=float, default=0)
     a.add_argument("--fst", "-b", action="store_true")
     a.add_argument("--fst-file", type=str)
     return a.parse_args()
@@ -183,7 +182,7 @@ def parse_args():
 
 if __name__ == "__main__":
     try:
-        output_table(interpret(parse_args()))
+        output_table(interpret(**parse_args().__dict__))
     except ValueError as x:
         print(x.args[0])
         if len(x.args) > 1:
