@@ -1,0 +1,20 @@
+! 12 of 80-TET with approximations to 400 Hz and 480 Hz when root = 440 Hz.scl
+! Created using Scale Workshop 1.5
+!
+! https://sevish.com/scaleworkshop/?name=12%20of%2080-TET%2C%20with%20approximations%20to%20400%20Hz%20and%20480%20Hz%20when%20root%20%3D%20440%20Hz&data=10%5C80%0A21%5C80%0A27%5C80%0A33%5C80%0A36%5C80%0A39%5C80%0A45%5C80%0A51%5C80%0A57%5C80%0A63%5C80%0A69%5C80%0A2%2F1&freq=440&midi=69&vert=-1&horiz=4&colors=white%20black%20white%20white%20black%20white%20black%20white%20white%20black%20white%20black&waveform=square&ampenv=organ
+!
+12 of 80-TET, with approximations to 400 Hz and 480 Hz when root = 440 Hz
+ 12
+!
+ 150.000000
+ 315.000000
+ 405.000000
+ 495.000000
+ 540.000000
+ 585.000000
+ 675.000000
+ 765.000000
+ 855.000000
+ 945.000000
+ 1035.000000
+ 2/1

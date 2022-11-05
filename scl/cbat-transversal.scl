@@ -1,0 +1,18 @@
+! Cbat_transversal.scl
+! Created using Scale Workshop 1.5
+!
+! https://sevish.com/scaleworkshop/?name=Cbat_(transversal)&data=10%2F9%0A7%2F6%0A6%2F5%0A5%2F4%0A21%2F16%0A27%2F20%0A11%2F8%0A81%2F55%0A8%2F5%0A2%2F1&freq=662.3&midi=69&vert=5&horiz=1&colors=white%20black%20white%20white%20black%20white%20black%20white%20white%20black%20white%20black&waveform=semisine&ampenv=organ
+!
+Cbat (transversal; root = 662.3 Hz)
+ 10
+!
+ 10/9
+ 7/6
+ 6/5
+ 5/4
+ 21/16
+ 27/20
+ 11/8
+ 81/55
+ 8/5
+ 2/1

@@ -1,0 +1,18 @@
+! Cbat root = 662.3 Hz.scl
+! Created using Scale Workshop 1.5
+!
+! https://sevish.com/scaleworkshop/?name=Cbat%20(root%20%3D%20662.3%20Hz)&data=180.%0A256.%0A318.%0A376.%0A470.%0A516.%0A560.%0A672.%0A818.%0A1200.&freq=662.3&midi=69&vert=5&horiz=1&colors=white%20black%20white%20white%20black%20white%20black%20white%20white%20black%20white%20black&waveform=semisine&ampenv=organ
+!
+Cbat (root = 662.3 Hz)
+ 10
+!
+ 180.
+ 256.
+ 318.
+ 376.
+ 470.
+ 516.
+ 560.
+ 672.
+ 818.
+ 1200.
