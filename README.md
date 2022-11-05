@@ -1,4 +1,4 @@
-# The Fruity Lòóps Intonational Custom Microtonal Patcher Preset
+# Fruity Lòóps Intonational Custom Microtonal Patcher Preset
 
 I've created a Patcher preset that allows music producers to use their own intonation schemes without having to pitch-shift each individual note. The default setting is tuned to C-Major Just with a Styrus set likewise to the default preset.
 
