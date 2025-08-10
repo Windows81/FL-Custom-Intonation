@@ -55,10 +55,11 @@ class info:
     offset: float
     pitches: list[tuple[float, int, str]]
     fst_path: str
+    fst_print: bool
 
 
 def calc(lines: list[str], shift: float) -> tuple[list[tuple[float, int, str]], float]:
-    a: list[(float, str)] = [(shift % 12, "1/1")]
+    a: list[tuple[float, str]] = [(shift % 12, "1/1")]
     n: int = -1
     c: int = 1
     for l in lines:
@@ -116,15 +117,15 @@ def calc(lines: list[str], shift: float) -> tuple[list[tuple[float, int, str]], 
     return d, off
 
 
-def interpret(pitch_shift, file, fst_file, fst) -> info:
+def interpret(pitch_shift, input_file, fst_file, fst_print, fst) -> info:
     desc: str = None
     a: list[str] = []
-    for l in file or sys.stdin:
+    for l in input_file or sys.stdin:
         if not desc:
             desc = l.strip()
             fn = (
-                os.path.split(file.name)[1]
-                if file and "<" not in file.name
+                os.path.split(input_file.name)[1]
+                if input_file and "<" not in input_file.name
                 else "".join(SUB_CHARS.get(c, c) for c in desc)
             )
         a.append(l)
@@ -133,6 +134,7 @@ def interpret(pitch_shift, file, fst_file, fst) -> info:
     off = pitch_shift
     t.pitches, t.offset = calc(a, off)
     t.description = desc
+    t.fst_print = fst_print
     t.fst_path = (
         fst_file.replace("{}", fn)
         if fst_file
@@ -145,13 +147,19 @@ def interpret(pitch_shift, file, fst_file, fst) -> info:
 
 def output_pitches(t: info):
     for (s, i, l) in t.pitches:
-        print(f'{KEYS[i]} {s*100:+06.1f} cents - "{l}"')
+        base = f'{KEYS[i]} {s*100:+06.1f} cents - "{l}"'
+        if t.fst_print:
+            base = f'[{(s+1)/2:6.6f}] ' + base
+        print(base)
 
 
 def output_table(t: info):
     print(t.description)
     output_pitches(t)
-    print(f"   {t.offset*100:+06.1f} cents")
+    base = f"   {t.offset*100:+06.1f} cents"
+    if t.fst_print:
+        base = f'[{(t.offset+12)/24:6.6f}] ' + base
+    print(base)
     fst_from_file(t)
 
 
@@ -162,8 +170,8 @@ def fst_from_file(t: info) -> bool:
     b = list(rf.raw.readall())
     FST_OFFSET = FST_SEEK[12]
     for (s, *_), p in zip(t.pitches, FST_SEEK):
-        b[p : p + 4] = struct.pack("f", 0.5 + s / 2)
-    b[FST_OFFSET : FST_OFFSET + 4] = struct.pack("f", 0.5 + t.offset / 24)
+        b[p: p + 4] = struct.pack("f", 0.5 + s / 2)
+    b[FST_OFFSET: FST_OFFSET + 4] = struct.pack("f", 0.5 + t.offset / 24)
     wf = open(t.fst_path, "wb")
     wf.write(bytes(b))
     rf.close()
@@ -173,9 +181,10 @@ def fst_from_file(t: info) -> bool:
 
 def parse_args():
     a = argparse.ArgumentParser()
-    a.add_argument("file", type=argparse.FileType("r"))
+    a.add_argument("input_file", type=argparse.FileType("r"))
     a.add_argument("--pitch-shift", "-o", type=float, default=0)
     a.add_argument("--fst", "-b", action="store_true")
+    a.add_argument("--fst-print", "-c", action="store_true")
     a.add_argument("--fst-file", type=str)
     return a.parse_args()
 
