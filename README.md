@@ -17,7 +17,7 @@ Replace Sytrus with your own stock plugins; VSTs do not work correctly under thi
 
 ### `MicrotonalMAutoPitch.fst`
 
-Ensure the MAutoPitch VST is installed and available for use.  
+Ensure the MAutoPitch VST is installed, available for use, and with the *"Automation compatibility mode for V10"* option enabled.. 
 ```console
 %userprofile%\Documents\Image-Line\FL Studio\Presets\Plugin presets\Effects\Patcher
 ```
